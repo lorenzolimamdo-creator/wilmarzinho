@@ -8,19 +8,808 @@
 <body>
     <h1>Título</h1>
     <hr>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita ipsam ex maiores tempora aperiam ad illum eius aspernatur quibusdam magnam!
-    Impedit voluptas odit quibusdam autem dolores. Aspernatur natus labore, assumenda suscipit rem minima veniam corporis fuga fugit corrupti quibusdam veritatis?
-    Rem totam quos sunt fugit quas autem dolores minima? Doloremque asperiores officia quam corrupti possimus consequuntur omnis, rem nemo quisquam.
-    Illo at nesciunt officia harum laboriosam sapiente recusandae numquam. Quaerat exercitationem hic quidem iusto quia assumenda fugiat cum velit temporibus.
-    Optio dicta excepturi officiis voluptatum, maiores ullam placeat. Eius eligendi consectetur laborum repellat laudantium illum eos similique aperiam atque beatae!
-    Aspernatur natus atque impedit quisquam reiciendis, dolores excepturi repellat dicta dolorum unde placeat quibusdam, neque iusto veritatis a quasi totam.
-    Ad, esse, fugiat beatae rem fuga dolore asperiores optio tempora minus, sed facilis reprehenderit officiis dolor illo harum quas quis.
-    Dignissimos quos laborum aliquid. Molestias officia odit aliquid assumenda qui, delectus, ex id omnis nemo laudantium voluptatibus? Saepe, eaque blanditiis!
-    Debitis assumenda culpa sapiente optio, quibusdam labore sequi pariatur accusamus distinctio, maxime quasi odit qui delectus dignissimos nulla iure veritatis.</p>
-    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Reprehenderit molestiae consequatur, ipsam nisi quaerat consectetur dolore. Repudiandae, repellat voluptas voluptate tenetur illum saepe officia explicabo. Quo vitae temporibus sed laborum.
-    Quod architecto, voluptates doloribus deserunt esse earum dolor vel suscipit molestias ad, quaerat quos et quo dignissimos aperiam illo ipsa id accusantium reprehenderit mollitia consequatur veritatis enim vitae! Hic, blanditiis!
-    Ea sed eligendi quasi sit excepturi natus ullam explicabo ratione ex consequatur, fuga distinctio labore omnis deserunt a temporibus asperiores exercitationem vel inventore, aliquam cupiditate? Quod consequuntur accusantium quo praesentium?
-    Mollitia odit facilis pariatur officiis et eos enim dolores ad ut necessitatibus, error corporis impedit laborum dolorum illo temporibus. Quasi veritatis commodi nesciunt mollitia accusantium quas laudantium beatae praesentium ad.
-    Eos voluptatem iure quidem enim voluptate eius ratione assumenda aspernatur deserunt saepe. Excepturi incidunt at quae cum unde error numquam molestias facilis aspernatur maxime explicabo mollitia reiciendis, suscipit quam illum.</p>
+ 
+import os
+
+# Criar estrutura de pastas
+base_dir = "/mnt/agents/output/PokedexCSharp"
+os.makedirs(base_dir, exist_ok=True)
+os.makedirs(f"{base_dir}/Models", exist_ok=True)
+os.makedirs(f"{base_dir}/Services", exist_ok=True)
+os.makedirs(f"{base_dir}/Data", exist_ok=True)
+
+# Program.cs
+program_cs = '''using System;
+using Pokedex.Services;
+
+namespace Pokedex
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.Title = "🎮 Pokédex C#";
+            
+            var pokedex = new PokedexService();
+            pokedex.Run();
+        }
+    }
+}
+'''
+
+# Pokemon.cs (Model)
+pokemon_model = '''using System;
+using System.Collections.Generic;
+
+namespace Pokedex.Models
+{
+    public enum PokemonType
+    {
+        Normal, Fire, Water, Electric, Grass, Ice,
+        Fighting, Poison, Ground, Flying, Psychic,
+        Bug, Rock, Ghost, Dragon, Dark, Steel, Fairy
+    }
+
+    public class Pokemon
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public List<PokemonType> Types { get; set; }
+        public int Height { get; set; } // em decímetros
+        public int Weight { get; set; } // em hectogramas
+        public List<string> Abilities { get; set; }
+        public Stats BaseStats { get; set; }
+        public string Category { get; set; }
+        public bool IsLegendary { get; set; }
+
+        public Pokemon()
+        {
+            Types = new List<PokemonType>();
+            Abilities = new List<string>();
+        }
+
+        public string GetTypeEmoji()
+        {
+            var emojis = new Dictionary<PokemonType, string>
+            {
+                { PokemonType.Normal, "⚪" },
+                { PokemonType.Fire, "🔥" },
+                { PokemonType.Water, "💧" },
+                { PokemonType.Electric, "⚡" },
+                { PokemonType.Grass, "🌿" },
+                { PokemonType.Ice, "❄️" },
+                { PokemonType.Fighting, "🥊" },
+                { PokemonType.Poison, "☠️" },
+                { PokemonType.Ground, "🌍" },
+                { PokemonType.Flying, "🦅" },
+                { PokemonType.Psychic, "🔮" },
+                { PokemonType.Bug, "🐛" },
+                { PokemonType.Rock, "🪨" },
+                { PokemonType.Ghost, "👻" },
+                { PokemonType.Dragon, "🐉" },
+                { PokemonType.Dark, "🌑" },
+                { PokemonType.Steel, "⚙️" },
+                { PokemonType.Fairy, "✨" }
+            };
+
+            var result = "";
+            foreach (var type in Types)
+            {
+                if (emojis.ContainsKey(type))
+                    result += emojis[type] + " ";
+            }
+            return result.Trim();
+        }
+
+        public void DisplayCard()
+        {
+            Console.WriteLine();
+            Console.WriteLine("╔══════════════════════════════════════════════════════╗");
+            Console.WriteLine($"║  #{Id:D3}  {(IsLegendary ? "👑 LENDÁRIO" : "")}".PadRight(55) + "║");
+            Console.WriteLine($"║  {Name.ToUpper()}".PadRight(55) + "║");
+            Console.WriteLine("╠══════════════════════════════════════════════════════╣");
+            Console.WriteLine($"║  Tipo:     {GetTypeEmoji()}".PadRight(55) + "║");
+            Console.WriteLine($"║  Categoria: {Category}".PadRight(55) + "║");
+            Console.WriteLine($"║  Altura:   {Height / 10.0:F1} m    Peso: {Weight / 10.0:F1} kg".PadRight(55) + "║");
+            Console.WriteLine("╠══════════════════════════════════════════════════════╣");
+            Console.WriteLine($"║  HP:        {BaseStats.HP,3}  █{new string('█', BaseStats.HP / 5).PadRight(20)}".PadRight(55) + "║");
+            Console.WriteLine($"║  Ataque:    {BaseStats.Attack,3}  █{new string('█', BaseStats.Attack / 5).PadRight(20)}".PadRight(55) + "║");
+            Console.WriteLine($"║  Defesa:    {BaseStats.Defense,3}  █{new string('█', BaseStats.Defense / 5).PadRight(20)}".PadRight(55) + "║");
+            Console.WriteLine($"║  Sp. Atk:   {BaseStats.SpecialAttack,3}  █{new string('█', BaseStats.SpecialAttack / 5).PadRight(20)}".PadRight(55) + "║");
+            Console.WriteLine($"║  Sp. Def:   {BaseStats.SpecialDefense,3}  █{new string('█', BaseStats.SpecialDefense / 5).PadRight(20)}".PadRight(55) + "║");
+            Console.WriteLine($"║  Velocidade:{BaseStats.Speed,3}  █{new string('█', BaseStats.Speed / 5).PadRight(20)}".PadRight(55) + "║");
+            Console.WriteLine("╠══════════════════════════════════════════════════════╣");
+            Console.WriteLine($"║  Habilidades:".PadRight(55) + "║");
+            foreach (var ability in Abilities)
+            {
+                Console.WriteLine($"║    • {ability}".PadRight(55) + "║");
+            }
+            Console.WriteLine("╠══════════════════════════════════════════════════════╣");
+            Console.WriteLine($"║  Descrição:".PadRight(55) + "║");
+            
+            // Quebrar descrição em linhas de ~48 caracteres
+            var words = Description.Split(' ');
+            var line = "";
+            foreach (var word in words)
+            {
+                if (line.Length + word.Length + 1 > 48)
+                {
+                    Console.WriteLine($"║  {line}".PadRight(55) + "║");
+                    line = word;
+                }
+                else
+                {
+                    line += (line.Length > 0 ? " " : "") + word;
+                }
+            }
+            if (line.Length > 0)
+                Console.WriteLine($"║  {line}".PadRight(55) + "║");
+            
+            Console.WriteLine("╚══════════════════════════════════════════════════════╝");
+        }
+    }
+
+    public class Stats
+    {
+        public int HP { get; set; }
+        public int Attack { get; set; }
+        public int Defense { get; set; }
+        public int SpecialAttack { get; set; }
+        public int SpecialDefense { get; set; }
+        public int Speed { get; set; }
+        public int Total => HP + Attack + Defense + SpecialAttack + SpecialDefense + Speed;
+    }
+}
+'''
+
+# PokemonData.cs (Dados)
+pokemon_data = '''using System.Collections.Generic;
+using Pokedex.Models;
+
+namespace Pokedex.Data
+{
+    public static class PokemonData
+    {
+        public static List<Pokemon> GetAllPokemon()
+        {
+            return new List<Pokemon>
+            {
+                new Pokemon
+                {
+                    Id = 1,
+                    Name = "Bulbasaur",
+                    Description = "Um Pokémon raro que nasce com uma semente nas costas. À medida que cresce, a semente floresce.",
+                    Types = new List<PokemonType> { PokemonType.Grass, PokemonType.Poison },
+                    Height = 7,
+                    Weight = 69,
+                    Abilities = new List<string> { "Overgrow", "Chlorophyll" },
+                    Category = "Seed Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 45, Attack = 49, Defense = 49, SpecialAttack = 65, SpecialDefense = 65, Speed = 45 }
+                },
+                new Pokemon
+                {
+                    Id = 4,
+                    Name = "Charmander",
+                    Description = "A chama na ponta da cauda indica sua saúde. Quando saudável, a chama queima intensamente.",
+                    Types = new List<PokemonType> { PokemonType.Fire },
+                    Height = 6,
+                    Weight = 85,
+                    Abilities = new List<string> { "Blaze", "Solar Power" },
+                    Category = "Lizard Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 39, Attack = 52, Defense = 43, SpecialAttack = 60, SpecialDefense = 50, Speed = 65 }
+                },
+                new Pokemon
+                {
+                    Id = 7,
+                    Name = "Squirtle",
+                    Description = "Quando retrai seu longo pescoço em sua concha, esguicha água com força incrível.",
+                    Types = new List<PokemonType> { PokemonType.Water },
+                    Height = 5,
+                    Weight = 90,
+                    Abilities = new List<string> { "Torrent", "Rain Dish" },
+                    Category = "Tiny Turtle Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 44, Attack = 48, Defense = 65, SpecialAttack = 50, SpecialDefense = 64, Speed = 43 }
+                },
+                new Pokemon
+                {
+                    Id = 25,
+                    Name = "Pikachu",
+                    Description = "Quando está irritado, descarrega a energia elétrica armazenada nas bolsas de suas bochechas.",
+                    Types = new List<PokemonType> { PokemonType.Electric },
+                    Height = 4,
+                    Weight = 60,
+                    Abilities = new List<string> { "Static", "Lightning Rod" },
+                    Category = "Mouse Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 35, Attack = 55, Defense = 40, SpecialAttack = 50, SpecialDefense = 50, Speed = 90 }
+                },
+                new Pokemon
+                {
+                    Id = 6,
+                    Name = "Charizard",
+                    Description = "Voa pelos céus em busca de oponentes poderosos. O fogo que expele pode derreter qualquer coisa.",
+                    Types = new List<PokemonType> { PokemonType.Fire, PokemonType.Flying },
+                    Height = 17,
+                    Weight = 905,
+                    Abilities = new List<string> { "Blaze", "Solar Power" },
+                    Category = "Flame Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 78, Attack = 84, Defense = 78, SpecialAttack = 109, SpecialDefense = 85, Speed = 100 }
+                },
+                new Pokemon
+                {
+                    Id = 9,
+                    Name = "Blastoise",
+                    Description = "Os canhões de água em sua concha são extremamente precisos. Podem atingir alvos a 50 metros.",
+                    Types = new List<PokemonType> { PokemonType.Water },
+                    Height = 16,
+                    Weight = 855,
+                    Abilities = new List<string> { "Torrent", "Rain Dish" },
+                    Category = "Shellfish Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 79, Attack = 83, Defense = 100, SpecialAttack = 85, SpecialDefense = 105, Speed = 78 }
+                },
+                new Pokemon
+                {
+                    Id = 150,
+                    Name = "Mewtwo",
+                    Description = "Foi criado por manipulação genética. Porém, apesar do cientista ter criado seu corpo, não conseguiu dar-lhe um coração compassivo.",
+                    Types = new List<PokemonType> { PokemonType.Psychic },
+                    Height = 20,
+                    Weight = 1220,
+                    Abilities = new List<string> { "Pressure", "Unnerve" },
+                    Category = "Genetic Pokémon",
+                    IsLegendary = true,
+                    BaseStats = new Stats { HP = 106, Attack = 110, Defense = 90, SpecialAttack = 154, SpecialDefense = 90, Speed = 130 }
+                },
+                new Pokemon
+                {
+                    Id = 149,
+                    Name = "Dragonite",
+                    Description = "Dizem que vive em algum lugar do mar. É capaz de voar ao redor do globo em apenas 16 horas.",
+                    Types = new List<PokemonType> { PokemonType.Dragon, PokemonType.Flying },
+                    Height = 22,
+                    Weight = 2100,
+                    Abilities = new List<string> { "Inner Focus", "Multiscale" },
+                    Category = "Dragon Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 91, Attack = 134, Defense = 95, SpecialAttack = 100, SpecialDefense = 100, Speed = 80 }
+                },
+                new Pokemon
+                {
+                    Id = 94,
+                    Name = "Gengar",
+                    Description = "Esconde-se nas sombras. Dizem que se Gengar estiver perto, você sentirá um calafrio inexplicável.",
+                    Types = new List<PokemonType> { PokemonType.Ghost, PokemonType.Poison },
+                    Height = 15,
+                    Weight = 405,
+                    Abilities = new List<string> { "Cursed Body" },
+                    Category = "Shadow Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 60, Attack = 65, Defense = 60, SpecialAttack = 130, SpecialDefense = 75, Speed = 110 }
+                },
+                new Pokemon
+                {
+                    Id = 133,
+                    Name = "Eevee",
+                    Description = "Possui genes instáveis que o fazem evoluir de várias formas diferentes dependendo do ambiente.",
+                    Types = new List<PokemonType> { PokemonType.Normal },
+                    Height = 3,
+                    Weight = 65,
+                    Abilities = new List<string> { "Run Away", "Adaptability", "Anticipation" },
+                    Category = "Evolution Pokémon",
+                    IsLegendary = false,
+                    BaseStats = new Stats { HP = 55, Attack = 55, Defense = 50, SpecialAttack = 45, SpecialDefense = 65, Speed = 55 }
+                },
+                new Pokemon
+                {
+                    Id = 144,
+                    Name = "Articuno",
+                    Description = "Um Pokémon lendário que controla o gelo. Dizem que suas asas geladas trazem o inverno.",
+                    Types = new List<PokemonType> { PokemonType.Ice, PokemonType.Flying },
+                    Height = 17,
+                    Weight = 554,
+                    Abilities = new List<string> { "Pressure", "Snow Cloak" },
+                    Category = "Freeze Pokémon",
+                    IsLegendary = true,
+                    BaseStats = new Stats { HP = 90, Attack = 85, Defense = 100, SpecialAttack = 95, SpecialDefense = 125, Speed = 85 }
+                },
+                new Pokemon
+                {
+                    Id = 145,
+                    Name = "Zapdos",
+                    Description = "Um Pokémon lendário que controla a eletricidade. Suas asas criam tempestades quando bate.",
+                    Types = new List<PokemonType> { PokemonType.Electric, PokemonType.Flying },
+                    Height = 16,
+                    Weight = 526,
+                    Abilities = new List<string> { "Pressure", "Static" },
+                    Category = "Electric Pokémon",
+                    IsLegendary = true,
+                    BaseStats = new Stats { HP = 90, Attack = 90, Defense = 85, SpecialAttack = 125, SpecialDefense = 90, Speed = 100 }
+                }
+            };
+        }
+    }
+}
+'''
+
+# PokedexService.cs
+pokedex_service = '''using System;
+using System.Collections.Generic;
+using System.Linq;
+using Pokedex.Models;
+using Pokedex.Data;
+
+namespace Pokedex.Services
+{
+    public class PokedexService
+    {
+        private List<Pokemon> _pokemonList;
+        private List<Pokemon> _capturedPokemon;
+
+        public PokedexService()
+        {
+            _pokemonList = PokemonData.GetAllPokemon();
+            _capturedPokemon = new List<Pokemon>();
+        }
+
+        public void Run()
+        {
+            bool running = true;
+            while (running)
+            {
+                ShowMainMenu();
+                var choice = Console.ReadLine();
+                
+                switch (choice)
+                {
+                    case "1":
+                        ListAllPokemon();
+                        break;
+                    case "2":
+                        SearchPokemon();
+                        break;
+                    case "3":
+                        FilterByType();
+                        break;
+                    case "4":
+                        ShowLegendaryPokemon();
+                        break;
+                    case "5":
+                        ShowCapturedPokemon();
+                        break;
+                    case "6":
+                        ComparePokemon();
+                        break;
+                    case "7":
+                        ShowTypeChart();
+                        break;
+                    case "0":
+                        running = false;
+                        Console.WriteLine("\\n👋 Até logo, Treinador!");
+                        break;
+                    default:
+                        Console.WriteLine("\\n❌ Opção inválida! Pressione qualquer tecla...");
+                        Console.ReadKey();
+                        break;
+                }
+            }
+        }
+
+        private void ShowMainMenu()
+        {
+            Console.Clear();
+            Console.WriteLine();
+            Console.WriteLine("╔══════════════════════════════════════════════╗");
+            Console.WriteLine("║          🎮 POKÉDEX C# EDITION              ║");
+            Console.WriteLine("║          ────────────────────              ║");
+            Console.WriteLine("║                                              ║");
+            Console.WriteLine("║  [1] 📋 Listar todos os Pokémon             ║");
+            Console.WriteLine("║  [2] 🔍 Buscar Pokémon por nome/número      ║");
+            Console.WriteLine("║  [3] 🌿 Filtrar por tipo                    ║");
+            Console.WriteLine("║  [4] 👑 Ver Pokémon Lendários              ║");
+            Console.WriteLine("║  [5] 🎒 Meus Pokémon Capturados             ║");
+            Console.WriteLine("║  [6] ⚔️ Comparar Pokémon                    ║");
+            Console.WriteLine("║  [7] 📊 Tabela de Fraquezas/Resistências    ║");
+            Console.WriteLine("║                                              ║");
+            Console.WriteLine("║  [0] 🚪 Sair                                 ║");
+            Console.WriteLine("╚══════════════════════════════════════════════╝");
+            Console.Write("Escolha uma opção: ");
+        }
+
+        private void ListAllPokemon()
+        {
+            Console.Clear();
+            Console.WriteLine("\\n📋 LISTA DE POKÉMON");
+            Console.WriteLine("═══════════════════════════════════════════════");
+            
+            foreach (var pokemon in _pokemonList.OrderBy(p => p.Id))
+            {
+                var legendaryMark = pokemon.IsLegendary ? "👑 " : "";
+                Console.WriteLine($"  #{pokemon.Id:D3}  {legendaryMark}{pokemon.Name,-15} {pokemon.GetTypeEmoji()}");
+            }
+            
+            Console.WriteLine("═══════════════════════════════════════════════");
+            Console.Write("\\nDigite o número do Pokémon para ver detalhes (ou Enter para voltar): ");
+            var input = Console.ReadLine();
+            
+            if (int.TryParse(input, out int id))
+            {
+                var pokemon = _pokemonList.FirstOrDefault(p => p.Id == id);
+                if (pokemon != null)
+                {
+                    pokemon.DisplayCard();
+                    AskToCapture(pokemon);
+                }
+                else
+                {
+                    Console.WriteLine("\\n❌ Pokémon não encontrado!");
+                }
+            }
+            
+            Console.WriteLine("\\nPressione qualquer tecla para voltar...");
+            Console.ReadKey();
+        }
+
+        private void SearchPokemon()
+        {
+            Console.Clear();
+            Console.WriteLine("\\n🔍 BUSCAR POKÉMON");
+            Console.WriteLine("═══════════════════════════════════════════════");
+            Console.Write("Digite o nome ou número do Pokémon: ");
+            var query = Console.ReadLine()?.Trim().ToLower();
+            
+            if (string.IsNullOrEmpty(query))
+                return;
+            
+            var results = _pokemonList.Where(p => 
+                p.Name.ToLower().Contains(query) || 
+                p.Id.ToString() == query).ToList();
+            
+            if (results.Count == 0)
+            {
+                Console.WriteLine("\\n❌ Nenhum Pokémon encontrado!");
+            }
+            else
+            {
+                foreach (var pokemon in results)
+                {
+                    pokemon.DisplayCard();
+                    AskToCapture(pokemon);
+                }
+            }
+            
+            Console.WriteLine("\\nPressione qualquer tecla para voltar...");
+            Console.ReadKey();
+        }
+
+        private void FilterByType()
+        {
+            Console.Clear();
+            Console.WriteLine("\\n🌿 FILTRAR POR TIPO");
+            Console.WriteLine("═══════════════════════════════════════════════");
+            
+            var types = Enum.GetValues(typeof(PokemonType)).Cast<PokemonType>().ToList();
+            for (int i = 0; i < types.Count; i++)
+            {
+                Console.WriteLine($"  [{i:D2}] {types[i]}");
+            }
+            
+            Console.Write("\\nEscolha o tipo (número): ");
+            if (int.TryParse(Console.ReadLine(), out int typeIndex) && typeIndex >= 0 && typeIndex < types.Count)
+            {
+                var selectedType = types[typeIndex];
+                var filtered = _pokemonList.Where(p => p.Types.Contains(selectedType)).ToList();
+                
+                Console.WriteLine($"\\n📌 Pokémon do tipo {selectedType}:");
+                Console.WriteLine("═══════════════════════════════════════════════");
+                
+                foreach (var pokemon in filtered)
+                {
+                    var legendaryMark = pokemon.IsLegendary ? "👑 " : "";
+                    Console.WriteLine($"  #{pokemon.Id:D3}  {legendaryMark}{pokemon.Name,-15} {pokemon.GetTypeEmoji()}");
+                }
+                
+                Console.WriteLine("═══════════════════════════════════════════════");
+                Console.Write("\\nDigite o número para detalhes (ou Enter): ");
+                if (int.TryParse(Console.ReadLine(), out int id))
+                {
+                    var pokemon = filtered.FirstOrDefault(p => p.Id == id);
+                    if (pokemon != null)
+                    {
+                        pokemon.DisplayCard();
+                        AskToCapture(pokemon);
+                    }
+                }
+            }
+            
+            Console.WriteLine("\\nPressione qualquer tecla para voltar...");
+            Console.ReadKey();
+        }
+
+        private void ShowLegendaryPokemon()
+        {
+            Console.Clear();
+            Console.WriteLine("\\n👑 POKÉMON LENDÁRIOS");
+            Console.WriteLine("═══════════════════════════════════════════════");
+            
+            var legendaries = _pokemonList.Where(p => p.IsLegendary).ToList();
+            foreach (var pokemon in legendaries)
+            {
+                pokemon.DisplayCard();
+                AskToCapture(pokemon);
+            }
+            
+            Console.WriteLine("\\nPressione qualquer tecla para voltar...");
+            Console.ReadKey();
+        }
+
+        private void ShowCapturedPokemon()
+        {
+            Console.Clear();
+            Console.WriteLine("\\n🎒 MEUS POKÉMON CAPTURADOS");
+            Console.WriteLine("═══════════════════════════════════════════════");
+            
+            if (_capturedPokemon.Count == 0)
+            {
+                Console.WriteLine("\\n  Você ainda não capturou nenhum Pokémon!");
+                Console.WriteLine("  Explore a Pokédex e capture seus favoritos.");
+            }
+            else
+            {
+                foreach (var pokemon in _capturedPokemon.OrderBy(p => p.Id))
+                {
+                    var legendaryMark = pokemon.IsLegendary ? "👑 " : "";
+                    Console.WriteLine($"  #{pokemon.Id:D3}  {legendaryMark}{pokemon.Name,-15} {pokemon.GetTypeEmoji()}");
+                }
+                Console.WriteLine($"\\n  Total capturado: {_capturedPokemon.Count}");
+            }
+            
+            Console.WriteLine("\\nPressione qualquer tecla para voltar...");
+            Console.ReadKey();
+        }
+
+        private void ComparePokemon()
+        {
+            Console.Clear();
+            Console.WriteLine("\\n⚔️ COMPARAR POKÉMON");
+            Console.WriteLine("═══════════════════════════════════════════════");
+            
+            Console.Write("Digite o nome do primeiro Pokémon: ");
+            var name1 = Console.ReadLine()?.Trim();
+            Console.Write("Digite o nome do segundo Pokémon: ");
+            var name2 = Console.ReadLine()?.Trim();
+            
+            var p1 = _pokemonList.FirstOrDefault(p => p.Name.Equals(name1, StringComparison.OrdinalIgnoreCase));
+            var p2 = _pokemonList.FirstOrDefault(p => p.Name.Equals(name2, StringComparison.OrdinalIgnoreCase));
+            
+            if (p1 == null || p2 == null)
+            {
+                Console.WriteLine("\\n❌ Um ou ambos os Pokémon não foram encontrados!");
+            }
+            else
+            {
+                Console.WriteLine();
+                Console.WriteLine("╔════════════════════╦════════════════════╦════════════════════╗");
+                Console.WriteLine($"║     ESTATÍSTICA    ║ {p1.Name,-18} ║ {p2.Name,-18} ║");
+                Console.WriteLine("╠════════════════════╬════════════════════╬════════════════════╣");
+                Console.WriteLine($"║  HP                ║ {p1.BaseStats.HP,18} ║ {p2.BaseStats.HP,18} ║");
+                Console.WriteLine($"║  Ataque            ║ {p1.BaseStats.Attack,18} ║ {p2.BaseStats.Attack,18} ║");
+                Console.WriteLine($"║  Defesa            ║ {p1.BaseStats.Defense,18} ║ {p2.BaseStats.Defense,18} ║");
+                Console.WriteLine($"║  Sp. Ataque        ║ {p1.BaseStats.SpecialAttack,18} ║ {p2.BaseStats.SpecialAttack,18} ║");
+                Console.WriteLine($"║  Sp. Defesa        ║ {p1.BaseStats.SpecialDefense,18} ║ {p2.BaseStats.SpecialDefense,18} ║");
+                Console.WriteLine($"║  Velocidade        ║ {p1.BaseStats.Speed,18} ║ {p2.BaseStats.Speed,18} ║");
+                Console.WriteLine("╠════════════════════╬════════════════════╬════════════════════╣");
+                Console.WriteLine($"║  TOTAL             ║ {p1.BaseStats.Total,18} ║ {p2.BaseStats.Total,18} ║");
+                Console.WriteLine("╚════════════════════╩════════════════════╩════════════════════╝");
+                
+                var winner = p1.BaseStats.Total > p2.BaseStats.Total ? p1 : p2;
+                Console.WriteLine($"\\n🏆 Vencedor em stats totais: {winner.Name} ({winner.BaseStats.Total} pts)");
+            }
+            
+            Console.WriteLine("\\nPressione qualquer tecla para voltar...");
+            Console.ReadKey();
+        }
+
+        private void ShowTypeChart()
+        {
+            Console.Clear();
+            Console.WriteLine("\\n📊 TABELA DE FRAQUEZAS E RESISTÊNCIAS");
+            Console.WriteLine("═══════════════════════════════════════════════");
+            Console.WriteLine();
+            Console.WriteLine("  🔥 FOGO    → Forte contra: 🌿 Grama, 🐛 Inseto, ⚙️ Aço, ❄️ Gelo");
+            Console.WriteLine("             → Fraco contra: 💧 Água, 🪨 Pedra, 🌍 Terra");
+            Console.WriteLine();
+            Console.WriteLine("  💧 ÁGUA    → Forte contra: 🔥 Fogo, 🌍 Terra, 🪨 Pedra");
+            Console.WriteLine("             → Fraco contra: 🌿 Grama, ⚡ Elétrico");
+            Console.WriteLine();
+            Console.WriteLine("  🌿 GRAMA   → Forte contra: 💧 Água, 🌍 Terra, 🪨 Pedra");
+            Console.WriteLine("             → Fraco contra: 🔥 Fogo, ❄️ Gelo, 🐛 Inseto, ☠️ Veneno, 🦅 Voador");
+            Console.WriteLine();
+            Console.WriteLine("  ⚡ ELÉTRICO→ Forte contra: 💧 Água, 🦅 Voador");
+            Console.WriteLine("             → Fraco contra: 🌍 Terra");
+            Console.WriteLine();
+            Console.WriteLine("  ❄️ GELO    → Forte contra: 🌿 Grama, 🌍 Terra, 🦅 Voador, 🐉 Dragão");
+            Console.WriteLine("             → Fraco contra: 🔥 Fogo, 🥊 Lutador, ⚙️ Aço, 🪨 Pedra");
+            Console.WriteLine();
+            Console.WriteLine("  🥊 LUTADOR → Forte contra: 🪨 Pedra, ⚙️ Aço, ❄️ Gelo, ☠️ Veneno, 🌑 Sombrio");
+            Console.WriteLine("             → Fraco contra: 🦅 Voador, 🔮 Psíquico, ✨ Fada");
+            Console.WriteLine();
+            Console.WriteLine("  👻 FANTASMA→ Forte contra: 👻 Fantasma, 🔮 Psíquico");
+            Console.WriteLine("             → Fraco contra: 👻 Fantasma, 🌑 Sombrio");
+            Console.WriteLine();
+            Console.WriteLine("  🐉 DRAGÃO  → Forte contra: 🐉 Dragão");
+            Console.WriteLine("             → Fraco contra: ❄️ Gelo, 🐉 Dragão, ✨ Fada");
+            
+            Console.WriteLine("\\nPressione qualquer tecla para voltar...");
+            Console.ReadKey();
+        }
+
+        private void AskToCapture(Pokemon pokemon)
+        {
+            if (_capturedPokemon.Contains(pokemon))
+            {
+                Console.WriteLine("\\n✅ Você já capturou este Pokémon!");
+                return;
+            }
+            
+            Console.Write($"\\n🎯 Deseja capturar {pokemon.Name}? (s/n): ");
+            if (Console.ReadLine()?.Trim().ToLower() == "s")
+            {
+                _capturedPokemon.Add(pokemon);
+                Console.WriteLine($"\\n🎉 {pokemon.Name} foi capturado!");
+                
+                // Animação simples
+                for (int i = 0; i < 3; i++)
+                {
+                    Console.Write("* ");
+                    System.Threading.Thread.Sleep(200);
+                }
+                Console.WriteLine();
+            }
+        }
+    }
+}
+'''
+
+# .csproj
+proj_file = '''<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Pokedex</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+'''
+
+# README.md
+readme = '''# 🎮 Pokédex C# Edition
+
+Uma Pokédex interativa em console desenvolvida em C# .NET 8.0, com dados de Pokémon, sistema de captura, comparação de stats e tabela de fraquezas.
+
+## ✨ Funcionalidades
+
+- 📋 **Listar todos os Pokémon** — Visualize todos os Pokémon disponíveis
+- 🔍 **Buscar Pokémon** — Encontre por nome ou número da Pokédex
+- 🌿 **Filtrar por tipo** — Filtre Pokémon por seus tipos elementais
+- 👑 **Pokémon Lendários** — Veja os Pokémon mais raros e poderosos
+- 🎒 **Sistema de Captura** — Capture seus Pokémon favoritos
+- ⚔️ **Comparar Pokémon** — Compare stats lado a lado
+- 📊 **Tabela de Fraquezas** — Consulte vantagens e desvantagens de tipos
+
+## 🚀 Como executar
+
+### Pré-requisitos
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download)
+
+### Passos
+
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/pokedex-csharp.git
+cd pokedex-csharp
+
+# Execute o projeto
+dotnet run
+```
+
+## 📁 Estrutura do Projeto
+
+```
+Pokedex/
+├── Program.cs              # Ponto de entrada
+├── Models/
+│   └── Pokemon.cs          # Modelos de dados (Pokemon, Stats, PokemonType)
+├── Data/
+│   └── PokemonData.cs      # Base de dados com 12 Pokémon
+├── Services/
+│   └── PokedexService.cs   # Lógica principal e menus
+└── Pokedex.csproj
+```
+
+## 🗃️ Pokémon Incluídos
+
+| # | Pokémon | Tipo(s) | Lendário |
+|---|---------|---------|----------|
+| 001 | Bulbasaur | 🌿 Grama / ☠️ Veneno | ❌ |
+| 004 | Charmander | 🔥 Fogo | ❌ |
+| 007 | Squirtle | 💧 Água | ❌ |
+| 025 | Pikachu | ⚡ Elétrico | ❌ |
+| 006 | Charizard | 🔥 Fogo / 🦅 Voador | ❌ |
+| 009 | Blastoise | 💧 Água | ❌ |
+| 094 | Gengar | 👻 Fantasma / ☠️ Veneno | ❌ |
+| 133 | Eevee | ⚪ Normal | ❌ |
+| 144 | Articuno | ❄️ Gelo / 🦅 Voador | ✅ |
+| 145 | Zapdos | ⚡ Elétrico / 🦅 Voador | ✅ |
+| 149 | Dragonite | 🐉 Dragão / 🦅 Voador | ❌ |
+| 150 | Mewtwo | 🔮 Psíquico | ✅ |
+
+## 🛠️ Tecnologias
+
+- C# 12
+- .NET 8.0
+- Programação Orientada a Objetos
+- LINQ
+
+## 📄 Licença
+
+Este projeto é de código aberto e está sob a licença MIT.
+
+---
+
+Feito com 💜 por um Treinador Pokémon
+'''
+
+# .gitignore
+gitignore = '''# Build results
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# NuGet
+*.nupkg
+'''
+
+# Salvar todos os arquivos
+files = {
+    f"{base_dir}/Program.cs": program_cs,
+    f"{base_dir}/Models/Pokemon.cs": pokemon_model,
+    f"{base_dir}/Data/PokemonData.cs": pokemon_data,
+    f"{base_dir}/Services/PokedexService.cs": pokedex_service,
+    f"{base_dir}/Pokedex.csproj": proj_file,
+    f"{base_dir}/README.md": readme,
+    f"{base_dir}/.gitignore": gitignore,
+}
+
+for path, content in files.items():
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+print("✅ Projeto criado com sucesso!")
+print(f"📁 Local: {base_dir}")
+print("\n📂 Arquivos criados:")
+for path in files.keys():
+    print(f"  • {path.replace(base_dir + '/', '')}")
+
+
 </body>
 </html>
